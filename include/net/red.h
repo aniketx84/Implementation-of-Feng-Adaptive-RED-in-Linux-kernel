@@ -139,12 +139,10 @@ struct red_parms {
 	u8		Wlog;		/* log(W)		*/
 	u8		Plog;		/* random number bits	*/
 	u8		Stab[RED_STAB_SIZE];
-        /* added by yogendra */
-        u8              status;          /* initialy status=Above and it will be switch between Below and Between value */
+    u8      status;         /* initialy status=Above and it will be switch between Below and Between value */
 };
 
-struct red_vars 
-{
+struct red_vars {
 	/* Variables */
 	int		qcount;		/* Number of packets since last random
 					   number generation */
@@ -170,19 +168,11 @@ static inline void red_set_vars(struct red_vars *v)
 	v->qcount	= -1;
 }
 
-enum
-{
-Below,
-Between,
-Above,
-RED_BELOW_MIN_THRESH,
-RED_BETWEEN_TRESH,
-RED_ABOVE_MAX_TRESH,
-RED_DONT_MARK,
-RED_PROB_MARK,
-RED_HARD_MARK,
+enum {
+	BELOW,
+	BETWEEN,
+	ABOVE,
 };
-
 static inline void red_set_parms(struct red_parms *p,
 				 u32 qth_min, u32 qth_max, u8 Wlog, u8 Plog,
 				 u8 Scell_log, u8 *stab, u32 max_P)
@@ -194,8 +184,7 @@ static inline void red_set_parms(struct red_parms *p,
 	p->qth_max	= qth_max << Wlog;
 	p->Wlog		= Wlog;
 	p->Plog		= Plog;
-        p->status       = Above;
-
+    p->status   = ABOVE;
 	if (delta < 0)
 		delta = 1;
 	p->qth_delta	= delta;
@@ -348,22 +337,27 @@ static inline int red_mark_probability(const struct red_parms *p,
 	return !(((qavg - p->qth_min) >> p->Wlog) * v->qcount < v->qR);
 }
 
+enum {
+	RED_BELOW_MIN_THRESH,
+	RED_BETWEEN_TRESH,
+	RED_ABOVE_MAX_TRESH,
+};
+
 static inline int red_cmp_thresh(const struct red_parms *p, unsigned long qavg)
 {
 	if (qavg < p->qth_min)
-               { 
 		return RED_BELOW_MIN_THRESH;
-               }
-                
-	else if(qavg >= p->qth_max)
-		{
+	else if (qavg >= p->qth_max)
 		return RED_ABOVE_MAX_TRESH;
-                }
-        else
-                {
-                 return RED_BETWEEN_TRESH;
-                }
+	else
+		return RED_BETWEEN_TRESH;
 }
+
+enum {
+	RED_DONT_MARK,
+	RED_PROB_MARK,
+	RED_HARD_MARK,
+};
 
 static inline int red_action(const struct red_parms *p,
 			     struct red_vars *v,
@@ -416,26 +410,19 @@ static inline void red_adaptative_algo(struct red_parms *p, struct red_vars *v)
 	max_p_delta = max(max_p_delta, 1U);
 	p->max_P_reciprocal = reciprocal_value(max_p_delta);
 }
-
-static inline void scred_algo(struct red_parms *p, struct red_vars *v)
+static inline void feng_adaptative_algo(struct red_parms *p, struct red_vars *v)
 {
-         unsigned long qavg;
-         qavg=v->qavg;
+	unsigned long qavg;
+    qavg=v->qavg;
 
-         if (qavg < p->qth_min&&(p->status!=Below))
-               {
-                p->status=Below;
-                p->max_P=(p->max_P)/3; 
-                }
-                
-	else if (qavg >= p->qth_max&&(p->status!=Above))
-                {
-                p->status=Above;
-                p->max_P=(p->max_P)*2;
-                }
-	else
-               {
-                p->status=Between;
-               }
+    if (qavg < p->qth_min&&(p->status!=Below)){
+        p->status=Below;
+        p->max_P=(p->max_P)/3; 
+    } else if (qavg >= p->qth_max&&(p->status!=Above)){
+        p->status=Above;
+        p->max_P=(p->max_P)*2;
+    } else {
+        p->status=Between;
+     }
 }
 #endif
