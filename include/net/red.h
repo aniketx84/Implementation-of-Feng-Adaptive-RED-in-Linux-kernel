@@ -139,7 +139,7 @@ struct red_parms {
 	u8		Wlog;		/* log(W)		*/
 	u8		Plog;		/* random number bits	*/
 	u8		Stab[RED_STAB_SIZE];
-    u8      status;         /* initialy status=Above and it will be switch between Below and Between value */
+        u8              status;         /* initialy status=Above and it will be switch between Below and Between value */
 };
 
 struct red_vars {
@@ -173,6 +173,7 @@ enum {
 	BETWEEN,
 	ABOVE,
 };
+
 static inline void red_set_parms(struct red_parms *p,
 				 u32 qth_min, u32 qth_max, u8 Wlog, u8 Plog,
 				 u8 Scell_log, u8 *stab, u32 max_P)
@@ -184,7 +185,7 @@ static inline void red_set_parms(struct red_parms *p,
 	p->qth_max	= qth_max << Wlog;
 	p->Wlog		= Wlog;
 	p->Plog		= Plog;
-    p->status   = ABOVE;
+        p->status       = ABOVE;
 	if (delta < 0)
 		delta = 1;
 	p->qth_delta	= delta;
@@ -410,19 +411,20 @@ static inline void red_adaptative_algo(struct red_parms *p, struct red_vars *v)
 	max_p_delta = max(max_p_delta, 1U);
 	p->max_P_reciprocal = reciprocal_value(max_p_delta);
 }
+
 static inline void feng_adaptative_algo(struct red_parms *p, struct red_vars *v)
 {
 	unsigned long qavg;
-    qavg=v->qavg;
+        qavg=v->qavg;
 
-    if (qavg < p->qth_min&&(p->status!=Below)){
-        p->status=Below;
-        p->max_P=(p->max_P)/3; 
-    } else if (qavg >= p->qth_max&&(p->status!=Above)){
-        p->status=Above;
-        p->max_P=(p->max_P)*2;
-    } else {
-        p->status=Between;
-     }
+    	if (qavg < p->qth_min && p->status != Below){
+        	p->status = Below;
+        	p->max_P = (p->max_P)/3; 
+    	} else if (qavg >= p->qth_max && p->status != Above){
+        	p->status = Above;
+        	p->max_P = (p->max_P)*2;
+    	} else {
+        	p->status = Between;
+     	}
 }
 #endif
