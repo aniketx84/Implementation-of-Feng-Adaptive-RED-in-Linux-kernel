@@ -417,14 +417,14 @@ static inline void feng_adaptative_algo(struct red_parms *p, struct red_vars *v)
 	unsigned long qavg;
         qavg = v->qavg;
 
-    	if (qavg < p->qth_min && p->status != Below){
-        	p->status = Below;
+    	if (qavg < p->qth_min && p->status != BELOW){
+        	p->status = BELOW;
         	p->max_P = (p->max_P)/3; 
-    	} else if (qavg >= p->qth_max && p->status != Above){
-        	p->status = Above;
+    	} else if (qavg >= p->qth_max && p->status != ABOVE){
+        	p->status = ABOVE;
         	p->max_P = (p->max_P)*2;
     	} else {
-        	p->status = Between;
+        	p->status = BETWEEN;
      	}
 }
 #endif
