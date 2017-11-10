@@ -69,7 +69,7 @@ static int red_enqueue(struct sk_buff *skb, struct Qdisc *sch,
 
 	if (red_is_idling(&q->vars))
 		red_end_of_idle_period(&q->vars);
-        feng_adaptative_algo(&q->parms, &q->vars);
+    feng_adaptative_algo(&q->parms, &q->vars);
 	switch (red_action(&q->parms, &q->vars, q->vars.qavg)) {
 	case RED_DONT_MARK:
 		break;
@@ -223,14 +223,12 @@ static int red_change(struct Qdisc *sch, struct nlattr *opt)
 
 static inline void red_adaptative_timer(unsigned long arg)
 {
-        bool isFengAdaptive=true;
 	struct Qdisc *sch = (struct Qdisc *)arg;
 	struct red_sched_data *q = qdisc_priv(sch);
 	spinlock_t *root_lock = qdisc_lock(qdisc_root_sleeping(sch));
 
 	spin_lock(root_lock);
-        if(isFengAdaptive!=true)
-		red_adaptative_algo(&q->parms, &q->vars);
+	red_adaptative_algo(&q->parms, &q->vars);
 	mod_timer(&q->adapt_timer, jiffies + HZ/2);
 	spin_unlock(root_lock);
 }
